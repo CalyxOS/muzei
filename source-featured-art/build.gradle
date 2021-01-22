@@ -25,7 +25,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$coreVersion"
     implementation "androidx.preference:preference-ktx:$preferenceVersion"
     implementation "androidx.work:work-runtime-ktx:$workManagerVersion"
-    implementation project(':muzei-api')
+    implementation "com.google.android.apps.muzei:muzei-api:3.4.0"
     implementation project(':extensions')
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
     implementation "androidx.browser:browser:$browserVersion"

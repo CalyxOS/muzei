@@ -22,7 +22,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
-    implementation project(':muzei-api')
+    implementation "com.google.android.apps.muzei:muzei-api:3.4.0"
     implementation project(':extensions')
     implementation project(':legacy-common')
     implementation "androidx.core:core-ktx:$coreVersion"
