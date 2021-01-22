@@ -72,4 +72,7 @@ android {
         jvmTarget = '1.8'
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
+    lintOptions {
+        abortOnError false
+    }
 }
