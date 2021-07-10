@@ -41,7 +41,7 @@ private fun getProviders(context: Context, packageName: String? = null): List<Pr
     return pm.queryIntentContentProviders(queryIntent, PackageManager.GET_META_DATA).filterNotNull().map {
         it.providerInfo
     }.filter {
-        it.enabled
+        it.packageName == "org.calyxos.blossom" && it.enabled //add only Blossom as provider
     }
 }
 
@@ -51,29 +51,32 @@ private fun getProviders(context: Context, packageName: String? = null): List<Pr
 @OptIn(ExperimentalCoroutinesApi::class)
 fun getInstalledProviders(context: Context): Flow<List<ProviderInfo>> = callbackFlow {
     val currentProviders = HashMap<ComponentName, ProviderInfo>()
-    val packageChangeReceiver : BroadcastReceiver = object : BroadcastReceiver() {
+    val packageChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             if (intent?.data == null) {
                 return
             }
             val packageName = intent.data?.schemeSpecificPart
-            when (intent.action) {
-                Intent.ACTION_PACKAGE_ADDED -> {
-                    getProviders(context, packageName).forEach { providerInfo ->
-                        currentProviders[providerInfo.getComponentName()] = providerInfo
+            //run on if packageName is for Calyx Blossom
+            if (packageName.equals("org.calyxos.blossom")) {
+                when (intent.action) {
+                    Intent.ACTION_PACKAGE_ADDED -> {
+                        getProviders(context, packageName).forEach { providerInfo ->
+                            currentProviders[providerInfo.getComponentName()] = providerInfo
+                        }
+                    }
+                    Intent.ACTION_PACKAGE_CHANGED, Intent.ACTION_PACKAGE_REPLACED -> {
+                        currentProviders.entries.removeAll { it.key.packageName == packageName }
+                        getProviders(context, packageName).forEach { providerInfo ->
+                            currentProviders[providerInfo.getComponentName()] = providerInfo
+                        }
+                    }
+                    Intent.ACTION_PACKAGE_REMOVED -> {
+                        currentProviders.entries.removeAll { it.key.packageName == packageName }
                     }
                 }
-                Intent.ACTION_PACKAGE_CHANGED, Intent.ACTION_PACKAGE_REPLACED -> {
-                    currentProviders.entries.removeAll { it.key.packageName == packageName }
-                    getProviders(context, packageName).forEach { providerInfo ->
-                        currentProviders[providerInfo.getComponentName()] = providerInfo
-                    }
-                }
-                Intent.ACTION_PACKAGE_REMOVED -> {
-                    currentProviders.entries.removeAll { it.key.packageName == packageName }
-                }
+                sendBlocking(currentProviders.values.toList())
             }
-            sendBlocking(currentProviders.values.toList())
         }
     }
     val packageChangeFilter = IntentFilter().apply {

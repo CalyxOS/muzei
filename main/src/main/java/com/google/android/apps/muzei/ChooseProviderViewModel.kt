@@ -78,12 +78,15 @@ class ChooseProviderViewModel(application: Application) : AndroidViewModel(appli
 
     private val database = MuzeiDatabase.getInstance(application)
 
+    //set current provider as blossom by default in the musei database
+
     val currentProvider = database.providerDao().currentProvider
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), 1)
 
     val unsupportedSources = LegacySourceManager.getInstance(application).unsupportedSources
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), 1)
 
+    //TODO will allow the comparator for now might want to remove later
     private val comparator = Comparator<ProviderInfo> { p1, p2 ->
         // The SourceArtProvider should always the last provider listed
         if (p1.authority == LEGACY_AUTHORITY) {
@@ -157,10 +160,10 @@ class ChooseProviderViewModel(application: Application) : AndroidViewModel(appli
             currentProviderAuthority,
             currentArtworkByProvider,
             descriptionInvalidationNanoTime
-    ) { installedProviders, providerAuthority, artworkForProvider, _ ->
+    ) { installedProviders, providerAuthority, artworkForProvider, _ -> //don't change the unused to _ yet
         installedProviders.map { providerInfo ->
             val authority = providerInfo.authority
-            val selected = authority == providerAuthority
+            val selected = providerInfo.packageName == "org.calyxos.blossom" //authority == providerAuthority //set Blossom as default
             val description = descriptions[authority] ?: run {
                 // Populate the description if we don't already have one
                 val newDescription = ProviderManager.getDescription(application, authority)
@@ -168,6 +171,8 @@ class ChooseProviderViewModel(application: Application) : AndroidViewModel(appli
                 newDescription
             }
             val currentArtwork = artworkForProvider[authority]
+            //set Blossom as the provider in the database
+            ProviderManager.select(getApplication(), authority)
             providerInfo.copy(
                     selected = selected,
                     description = description,

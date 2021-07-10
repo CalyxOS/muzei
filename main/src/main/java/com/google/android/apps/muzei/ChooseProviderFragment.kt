@@ -185,10 +185,11 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
         })
         val adapter = ProviderListAdapter()
         val playStoreAdapter = PlayStoreProviderAdapter()
-        binding.list.adapter = ConcatAdapter(adapter, playStoreAdapter)
+        binding.list.adapter = ConcatAdapter(adapter)
         viewModel.providers.onEach {
             adapter.submitList(it) {
-                playStoreAdapter.shouldShow = true
+                //playStoreAdapter.shouldShow = false // don't show the other providers from the Playstore
+
                 if (args.authority != null && !scrolledToProvider) {
                     val index = it.indexOfFirst { providerInfo ->
                         providerInfo.authority == args.authority
@@ -223,7 +224,7 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
                     setAction(R.string.legacy_action_learn_more) {
                         findNavController().navigate(R.id.legacy_info)
                     }
-                    show()
+                    //show() //Don't show unsupported source TODO remove the whole block later
                     // Increase the padding when the SnackBar is shown to avoid
                     // overlapping the last element
                     binding.list.updatePadding(bottom = resources.getDimensionPixelSize(
